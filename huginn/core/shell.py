@@ -19,6 +19,12 @@ def run(cmd, cwd=None):
     return process.returncode, "".join(lines)
 
 
+def capture(cmd, cwd=None):
+    """Executa cmd sem transmitir a saída, e devolve (returncode, stdout, stderr)."""
+    result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return result.returncode, result.stdout, result.stderr
+
+
 def which(binary):
     result = subprocess.run(
         ["which", binary], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL

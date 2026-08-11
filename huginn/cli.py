@@ -2,19 +2,10 @@ import argparse
 import sys
 
 from huginn import __version__
-from huginn.core import logger
+from huginn.core import banner, logger
 from huginn.core.authorization import confirm_authorization
 from huginn.core.output import prepare_output_dir
-
-PASSIVE_ROADMAP = [
-    "MetaCrawler",
-    "Google Hacking (dorks)",
-    "LinkedIn",
-    "Whois",
-    "Wayback Machine",
-    "Netcraft / DNSDumpster",
-    "OSINT Framework",
-]
+from huginn.passive import dnsdumpster, manual_links, wayback, whois_lookup
 
 ACTIVE_ROADMAP = [
     "Enumeração de subdomínios",
@@ -42,9 +33,18 @@ def build_parser():
 
 
 def run_passive(domain, output_dir):
-    logger.info(f"Reconhecimento passivo em {domain} — módulos ainda não implementados (Fase 2):")
-    for item in PASSIVE_ROADMAP:
-        logger.info(f"    [ ] {item}")
+    passive_dir = output_dir / "passive"
+    passive_dir.mkdir(parents=True, exist_ok=True)
+
+    results = {}
+    for name, module in (
+        ("whois", whois_lookup),
+        ("wayback", wayback),
+        ("dnsdumpster", dnsdumpster),
+        ("manual_links", manual_links),
+    ):
+        results[name] = module.run(domain, passive_dir)
+    return results
 
 
 def run_active(domain, output_dir):
@@ -54,6 +54,7 @@ def run_active(domain, output_dir):
 
 
 def main(argv=None):
+    banner.show()
     parser = build_parser()
     args = parser.parse_args(argv)
 
