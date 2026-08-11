@@ -1,3 +1,5 @@
+import json
+
 from huginn.core import logger, shell
 
 SECURITY_HEADERS = [
@@ -36,6 +38,9 @@ def run(domain, output_dir):
 
     headers = _parse_last_header_block(raw)
     missing = [h for h in SECURITY_HEADERS if h not in headers]
+
+    analysis_path = output_dir / "headers_analysis.json"
+    analysis_path.write_text(json.dumps({"missing_headers": missing}, indent=2))
 
     if missing:
         logger.warn(f"Headers de segurança ausentes: {', '.join(missing)}")

@@ -4,7 +4,7 @@ from huginn.core import logger, shell
 def run(domain, output_dir):
     target = f"https://{domain}"
     logger.info(f"Detectando WAF em {target} (wafw00f)...")
-    returncode, raw = shell.run(["wafw00f", target])
+    returncode, raw = shell.run(["wafw00f", "--no-colors", target])
     result_path = output_dir / "wafw00f.txt"
     result_path.write_text(raw)
 

@@ -4,7 +4,7 @@ from huginn.core import logger, shell
 def run(domain, output_dir):
     target = f"https://{domain}"
     logger.info(f"Executando WhatWeb em {target}...")
-    returncode, raw = shell.run(["whatweb", "-a", "3", target])
+    returncode, raw = shell.run(["whatweb", "-a", "3", "--color=never", target])
     result_path = output_dir / "whatweb.txt"
     result_path.write_text(raw)
 
