@@ -85,8 +85,8 @@ fi
 # pacotes base (sempre via gerenciador nativo)
 # ---------------------------------------------------------------------------
 c_info "Instalando dependências base do sistema..."
-BASE_DEBIAN=(curl whois nmap git python3 python3-venv python3-pip ruby ruby-dev build-essential libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info fonts-liberation)
-BASE_ARCH=(curl whois nmap git python python-pip ruby base-devel pango cairo gdk-pixbuf2 libffi noto-fonts)
+BASE_DEBIAN=(curl whois nmap git unzip python3 python3-venv python3-pip ruby ruby-dev build-essential libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info fonts-liberation)
+BASE_ARCH=(curl whois nmap git unzip python python-pip ruby base-devel pango cairo gdk-pixbuf2 libffi noto-fonts)
 
 if [ "$FAMILY" = "debian" ]; then
     for pkg in "${BASE_DEBIAN[@]}"; do
@@ -144,33 +144,6 @@ install_wafw00f() {
     fi
 }
 
-install_fierce() {
-    if try_install_native fierce fierce; then mark fierce ok; return; fi
-    if pip_install fierce; then
-        $SUDO ln -sf "$VENV_DIR/bin/fierce" "$BIN_TARGET/fierce"
-        mark fierce ok
-    else
-        mark fierce fail
-    fi
-}
-
-install_sublist3r() {
-    if pip_install sublist3r; then
-        mark sublist3r ok
-    else
-        mark sublist3r fail
-    fi
-}
-
-install_dnsenum() {
-    if try_install_native dnsenum dnsenum; then
-        mark dnsenum ok
-    else
-        c_warn "dnsenum não disponível nesta distro; enumeração de subdomínios seguirá com fierce/sublist3r/subfinder."
-        mark dnsenum skip
-    fi
-}
-
 install_subfinder() {
     if command -v subfinder >/dev/null 2>&1; then mark subfinder ok; return; fi
     c_info "Baixando subfinder (binário oficial via GitHub releases)..."
@@ -183,8 +156,8 @@ install_subfinder() {
     fi
     local tmp
     tmp=$(mktemp -d)
-    if curl -fsSL "$url" -o "$tmp/subfinder.tar.gz" >/dev/null 2>&1 \
-        && tar -xzf "$tmp/subfinder.tar.gz" -C "$tmp" >/dev/null 2>&1 \
+    if curl -fsSL "$url" -o "$tmp/subfinder.zip" >/dev/null 2>&1 \
+        && unzip -oq "$tmp/subfinder.zip" -d "$tmp" >/dev/null 2>&1 \
         && $SUDO install -m 755 "$tmp/subfinder" "$BIN_TARGET/subfinder"; then
         mark subfinder ok
     else
@@ -196,9 +169,6 @@ install_subfinder() {
 c_info "Instalando ferramentas de reconhecimento..."
 install_whatweb
 install_wafw00f
-install_fierce
-install_sublist3r
-install_dnsenum
 install_subfinder
 
 # ---------------------------------------------------------------------------
