@@ -5,18 +5,10 @@ from huginn import __version__
 from huginn.core import banner, logger
 from huginn.core.authorization import confirm_authorization
 from huginn.core.output import prepare_output_dir
-from huginn.passive import dnsdumpster, manual_links, wayback, whois_lookup
-
-ACTIVE_ROADMAP = [
-    "Enumeração de subdomínios",
-    "WhatWeb",
-    "Wappalyzer / BuiltWith",
-    "DotGit exposed",
-    "Wafw00f",
-    "Cabeçalhos HTTP",
-    "Banner grabbing (nmap)",
-    "Análise de código-fonte",
-]
+from huginn.passive import dnsdumpster, wayback, whois_lookup
+from huginn.passive import manual_links as passive_links
+from huginn.active import banner_grab, dotgit, headers as http_headers, source_analysis, subdomains, waf_detect, whatweb
+from huginn.active import manual_links as active_links
 
 
 def build_parser():
@@ -41,16 +33,29 @@ def run_passive(domain, output_dir):
         ("whois", whois_lookup),
         ("wayback", wayback),
         ("dnsdumpster", dnsdumpster),
-        ("manual_links", manual_links),
+        ("manual_links", passive_links),
     ):
         results[name] = module.run(domain, passive_dir)
     return results
 
 
 def run_active(domain, output_dir):
-    logger.info(f"Reconhecimento ativo em {domain} — módulos ainda não implementados (Fase 3):")
-    for item in ACTIVE_ROADMAP:
-        logger.info(f"    [ ] {item}")
+    active_dir = output_dir / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+
+    results = {}
+    for name, module in (
+        ("subdomains", subdomains),
+        ("whatweb", whatweb),
+        ("manual_links", active_links),
+        ("dotgit", dotgit),
+        ("waf_detect", waf_detect),
+        ("headers", http_headers),
+        ("banner_grab", banner_grab),
+        ("source_analysis", source_analysis),
+    ):
+        results[name] = module.run(domain, active_dir)
+    return results
 
 
 def main(argv=None):
